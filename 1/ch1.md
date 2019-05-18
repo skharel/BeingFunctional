@@ -152,8 +152,111 @@ Promise.resolve(input)
   .then(tapLog);
 ```
 
-Now lets move to updating the function `pickAttribute`. From earlier discussion, we were able to replace the arrow function with the function `tapLog` because airity, number of arguments, of this function is one. For the function `pickAttribute`, the airity count is 2. So, it _appears_ we really cannot replace the arrow function for step 2. 🤔
+Now lets move to the function `pickAttribute`. From our earlier discussion, the reason we were able to replace the arrow function's with `point free` code by using the function `tapLog` because it's airity, number of arguments to the function, was one. However, for the function `pickAttribute`, the airity is 2. It _seems_ like we really cannot replace the "glue" arrow function for step 2. 🤔
 
-`Closure` to the rescue!
+`Closure` to the rescue! But before I show the trick with closure, let's talk about the parameters of this function `pickAttribute`. First parameter is array of attributes that we want to pick; second parameter is the data. Of course we could have ordered them in reverse but there is very good reason we put data last and very soon it will be clear why. 
+
+> As a functional programmer **memorize the mantra "data last"**
+
+For this first argument we knew about it when we wrote this program. The only unknown part was the data we will be getting. So, let's try to re-write this function in a way that we could tell it in advance about the arguments we know now and later we will tell about the unknown argument, which is data most of the time. With the help from closure we can do it as:
+
+```js
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    // some code goes here that uses attributes and data arguments
+    // return correct data
+  };
+}
+```
+
+This is suddenly a very interesting function because it is a function that returns another function. Let's look at following piece of code that invokes this new function `pickAttribute`
+
+```js
+  let bob = pickAttribute(['first', 'last']);
+```
+
+When we invoked the function `pickAttribute`, it returned the inner function `pickAttributeHelper`. The variable `bob` references this inner function which means bob is a function waiting for the `data` parameter. Now, if we think about the `then` block in Promise chain, what we really wanted was a function that takes one argument. The shape of this new function `bob` matches that. This means we can re-write our promise chain as:
+
+```js
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    // some code goes here that uses attributes and data arguments
+    // return correct data
+  };
+}
+
+let bob = pickAttribute(['first', 'last']);
+
+Promise.resolve(input)
+  .then(tapLog)
+  .then(bob)
+  .then(tapLog);
+```
+
+After looking at this snippet, we can certainly remove the line where we define bob and replace the bob in the promise chain with actual call to the function `pickAttribute` as:
+
+```js
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    // some code goes here that uses attributes and data arguments
+    // return correct data
+  };
+}
+
+Promise.resolve(input)
+  .then(tapLog)
+  .then(pickAttribute(['first', 'last']))
+  .then(tapLog);
+```
+
+This code certainly reads a lot better then having bob in the middle. Best of all, the name bob was not even very good one and now we don't even have to think about a better name for bob. While we are at it let's finish coding `pickAttribute` by filling the inner function `pickAttributeHelper`
+
+```js
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    return attributes.reduce((acc, attribute) => {
+      acc[attribute] = data[attribute];
+      return acc;
+    }, {});
+  };
+}
+```
+
+I literally copy pasted the content from the non functional code that we looked earlier to finish this implementation. Did you notice how `closure` is used in this code?
+
+> Closure is observed for the attributes argument because when the inner function executes, it makes the use of the outer function's argument.
+
+
+Here is the final **functional code**
+
+```js
+let input = {
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+};
+
+function tapLog(data) {
+  console.log(data);
+  return data;
+}
+
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    return attributes.reduce((acc, attribute) => {
+      acc[attribute] = data[attribute];
+      return acc;
+    }, {});
+  };
+}
+
+Promise.resolve(input)
+  .then(tapLog)
+  .then(pickAttribute(['first', 'last']))
+  .then(tapLog);
+```
+
+This promise chain should read a lot better then the non-functional code.
+
 
 [WORK IN PROGRESS]

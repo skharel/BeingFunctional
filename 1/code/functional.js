@@ -11,14 +11,16 @@ function tapLog(data) {
   return data;
 }
 
-function pickAttribute(attributes, data) {
-  return attributes.reduce((acc, attribute) => {
-    acc[attribute] = data[attribute];
-    return acc;
-  }, {});
+function pickAttribute(attributes) {
+  return function pickAttributeHelper(data) {
+    return attributes.reduce((acc, attribute) => {
+      acc[attribute] = data[attribute];
+      return acc;
+    }, {});
+  };
 }
 
 Promise.resolve(input)
   .then(tapLog)
-  .then(data => pickAttribute(['first', 'last'], data))
+  .then(pickAttribute(['first', 'last']))
   .then(tapLog);
