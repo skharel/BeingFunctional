@@ -33,8 +33,6 @@ Let's get started with the non functional version of the code and we will conver
 > Although, this is not a basic of JS book it might be beneficial to talk just a little bit about Promises in JavaScript. For the readers who understand Promise, it is safe to skip this section. In a Promise world, you can start a chain of execution by calling `Promise.resolve` and passing some static set of data. After, that you can use as many `.then` as you want. The `then` method accepts a function and as a input to this function the data from the previous step is passed. Execution starts at the top and makes it way down.
 
 ```js  {.line-numbers}
-let data = [1, 2, 3, 4, 5];
-
 let input = {
   first: 'John',
   middle: 'M',
