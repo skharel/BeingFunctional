@@ -2,9 +2,9 @@
 
 We recently had new team member joining our team. One of the thing I was trying to explain to him was the kind of coding style we use in our team. I told him we do "Functional Style Programming" using JavaScript. I showed him code from our repository with short explanation of what we were doing and why.
 
-The reason this explanation was short was because even I was having hard time to craft "definition" of functional programming. So, I came home and looked up (aka googling) the definition and didn't exactly feel I could use that definition to explain our code. After few more search, I decided to go back and read few sections from the book [Functional Programming in JavaScript](https://www.manning.com/books/functional-programming-in-javascript). After reading a particular line, which I will get in towards the later section, it enlightened me again. This was the first book I read, to learn about Functional Programming (FP) and it is where I get back for more details on some topics.
+The reason this explanation was short was because even I was having hard time to craft "definition" of functional programming. So, I came home and looked up (aka googling) the definition and didn't exactly feel I could use that definition to explain our code. After few more search, I decided to go back and read few sections from the book [Functional Programming in JavaScript](https://www.manning.com/books/functional-programming-in-javascript). This is the first book I read to learn about Functional Programming (FP) and after reading few sections from it again, I finally had a plan on how to explain FP in a simplest way.
 
-After that enlightenment, I had plan on how to explain what we are doing. In this part of the book, I am going to use the same code example I showed to him and eventually to our entire department.
+In order to explain it, I crafted a trivial JavaScript program. First, I started with non-functional style of coding and then re-implemented it using functional style. In this chapter I am going to present same example I showed to my new team mate and eventually to our entire department.
 
 ## Problem
 
@@ -79,7 +79,7 @@ data => pickAttribute(['first', 'last'], data);
 
 The result of the first then block was `{ first: 'John', middle: 'M', last: 'Doe' }` which is the input to this second then block. When this arrow function is executed, it invokes the function `pickAttribute` to which we pass array of fields that we want to pluck from the data object. The result of this function is `{ first: 'John', last: 'Doe' }`
 
-> Some reader more familiar with Array ib JavaScript may prefer to rewrite `pickAttribute` function as:
+> Some reader more familiar with Array in JavaScript may prefer to rewrite `pickAttribute` function as:
 >
 > ```js
 > function pickAttribute(attributes, data) {
@@ -253,6 +253,27 @@ Promise.resolve(input)
   .then(tapLog);
 ```
 
-This promise chain should read a lot better then the non-functional code.
+## Functional Programming
+
+<p align="center">
+    <img src="images/data_viz.png" width="40%">
+</p>
+
+This fountain quite elegantly captures the kind of mind set we should have when writing Functional Style of code.
+
+In this water fountain intermediate containers are placed in such a way that when water starts to flow from the top, subsequent container can collect them and pass to the next one until it makes it way to the bottom. As the water flows, each of these intermediate container can totally do something different as the water makes through it. For eg first container can mix red color, second one blue color etc. The only constraint for this fountain is that each intermediate container must eventually pass liquid else it will break down. Also, it is the expectation of each subsequent container that the container before it passes liquid.
+
+Now let's revisit the functional `Promise.chain` one more time.
+
+```js
+Promise.resolve(input)
+  .then(tapLog)
+  .then(pickAttribute(['first', 'last']))
+  .then(tapLog);
+```
+
+This Promise chain is analogous to the water fountain image shown above. `Promise.resolve` is equivalent to the top of the fountain from which water starts to flow. Each `then` block is equivalent to the intermediate container of the fountain. The only constraint on subsequent then block is that they must be able to operate on the data returned by previous step.
+
+> With Functional Programming, our goal is to build an abstract flow of control that eventually operates on data. Our mindset should be set on building a fountain with right containers that is eventually just waiting for data to operate on.
 
 [WORK IN PROGRESS]
