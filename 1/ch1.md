@@ -150,13 +150,13 @@ Promise.resolve(input)
   .then(tapLog);
 ```
 
-Now lets move to the function `pickAttribute`. From our earlier discussion, the reason we were able to replace the arrow function's with `point free` code by using the function `tapLog` because it's airity, number of arguments to the function, was one. However, for the function `pickAttribute`, the airity is 2. It _seems_ like we really cannot replace the "glue" arrow function for step 2. 🤔
+Now lets move to the function `pickAttribute`. For Step 1 & Step 3, we were able to replace the arrow function's with `point free` code by using the function `tapLog` because the airity, number of arguments, of `tapLog` was one. However, for the function `pickAttribute`, airity is two. It _seems_ like we really cannot replace the "glue" arrow function for step 2. 🤔
 
-`Closure` to the rescue! But before I show the trick with closure, let's talk about the parameters of this function `pickAttribute`. First parameter is array of attributes that we want to pick; second parameter is the data. Of course we could have ordered them in reverse but there is very good reason we put data last and very soon it will be clear why. 
+`Closure` to the rescue! Using `Closure` we can reduce the number of arguments for this function. But before I show how, let's analyze arguments for the function `pickAttribute`. It's _first argument_ is an array of attributes that we want to pick (from data - second argument); it's _second argument_ is data we want to operate on.
 
-> As a functional programmer **memorize the mantra "data last"**
+> For this function `pickAttribute` we could have ordered these 2 arguments in reverse order but there is a very good reason why we passed data in second argument, in this case the last argument. After we re-implement the function `pickAttribute` the reason for this particular ordering, where data is passed as last argument, should be clear. As a functional programmer, **memorize the mantra "data last"**
 
-For this first argument we knew about it when we wrote this program. The only unknown part was the data we will be getting. So, let's try to re-write this function in a way that we could tell it in advance about the arguments we know now and later we will tell about the unknown argument, which is data most of the time. With the help from closure we can do it as:
+Back to analysis of the arguments, we knew the value for the first argument, properties that we wanted to pick, when we wrote this program. The only unknown part was the data because we did not know what we will get when this program is executed. Now, let's re-write this function `pickAttribute` in a way that we could partially execute this function with the known argument and later be able to specify the unknown argument, which is almost always data, and then execute this function. Using closure we can re-write as:
 
 ```js
 function pickAttribute(attributes) {
@@ -170,10 +170,10 @@ function pickAttribute(attributes) {
 This is suddenly a very interesting function because it is a function that returns another function. Let's look at following piece of code that invokes this new function `pickAttribute`
 
 ```js
-  let bob = pickAttribute(['first', 'last']);
+let bob = pickAttribute(['first', 'last']);
 ```
 
-When we invoked the function `pickAttribute`, it returned the inner function `pickAttributeHelper`. The variable `bob` references this inner function which means bob is a function waiting for the `data` parameter. Now, if we think about the `then` block in Promise chain, what we really wanted was a function that takes one argument. The shape of this new function `bob` matches that. This means we can re-write our promise chain as:
+When we invoke first function `pickAttribute` with known values, it returned the inner function `pickAttributeHelper` which takes only the data argument. When the result of this invocation is assigned to variable `bob`, it references this inner function `pickAttributeHelper` which means bob is a function waiting for the `data` parameter. Now, let's go back to the `then` block in Promise chain. In order to replace the glue arrow function in Step 2 - `data => pickAttribute(['first', 'last'], data`, we wanted a function that takes data argument. The shape of this new function `bob` aka `pickAttributeHelper` matches that. This means we can re-write our promise chain as:
 
 ```js
 function pickAttribute(attributes) {
@@ -191,7 +191,7 @@ Promise.resolve(input)
   .then(tapLog);
 ```
 
-After looking at this snippet, we can certainly remove the line where we define bob and replace the bob in the promise chain with actual call to the function `pickAttribute` as:
+In this code snippet, we can certainly remove the line where we declared bob and replace the bob in the promise chain with actual call to the function `pickAttribute` as:
 
 ```js
 function pickAttribute(attributes) {
@@ -220,10 +220,9 @@ function pickAttribute(attributes) {
 }
 ```
 
-I literally copy pasted the content from the non functional code that we looked earlier to finish this implementation. Did you notice how `closure` is used in this code?
+I literally copy pasted the content from the non functional code that we looked earlier to finish this implementation. Did you notice how `closure` comes into picture in this code?
 
 > Closure is observed for the attributes argument because when the inner function executes, it makes the use of the outer function's argument.
-
 
 Here is the final **functional code**
 
@@ -255,6 +254,5 @@ Promise.resolve(input)
 ```
 
 This promise chain should read a lot better then the non-functional code.
-
 
 [WORK IN PROGRESS]
