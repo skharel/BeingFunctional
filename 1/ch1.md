@@ -1,47 +1,38 @@
 # Being functional - what does it mean?
 
-We recently had new team member joining our team. One of the thing I was trying to explain to him was the kind of coding style we use in our team. I told him we do "Functional Style Programming" using JavaScript. I showed him code from our repository with short explanation of what we were doing and why.
+We recently had new team member joining our team. As part of onboarding I was giving him an overview of coding practice we follow and quickly mentioned that we do "Functional Style Programming" using JavaScript. I pulled some code from our repository and tried to explain what was going on; but I was quite unsatisfied with my own explanation.
 
-The reason this explanation was short was because even I was having hard time to craft "definition" of functional programming. So, I came home and looked up (aka googling) the definition and didn't exactly feel I could use that definition to explain our code. After few more search, I decided to go back and read few sections from the book [Functional Programming in JavaScript](https://www.manning.com/books/functional-programming-in-javascript). This is the first book I read to learn about Functional Programming (FP) and after reading few sections from it again, I finally had a plan on how to explain FP in a simplest way.
+The reason I was unsatisfied was because it was hard for me to craft a working "definition" of Functional Programming, here on referred as FP, that would capture the gist of the code example I showed. So, I cam back home and looked up (aka googled) the definition and didn't exactly feel I could use those definition either to explain the concept. After few more search, I decided to go back and read some sections of the book [Functional Programming in JavaScript](https://www.manning.com/books/functional-programming-in-javascript). This is the first book I read to learn about FP and I absolutely loved it. After reading few sections from this book again, I finally had a plan on how to explain FP in a simplest way.
 
-In order to explain it, I crafted a trivial JavaScript program. First, I started with non-functional style of coding and then re-implemented it using functional style. In this chapter I am going to present same example I showed to my new team mate and eventually to our entire department.
+In order to explain it, first I crafted a trivial problem; then I implemented a solution to it using non-functional style. After that, I implemented a more functional approach solution. After that I was motivated enough to give an overview of FP to our department and then I wanted to write more about it.
 
-## Problem
+In this chapter I am going to get started with the same trivial problem and implement non-functional as well as functional style. Hopefully, this helps the reader grasp basic idea of the FP and how to think about it when implementing it.
 
-Suppose we have following json data
+## The Problem
 
-```json
-    {
-      "first": "John",
-      "middle": "M",
-      "last": "Doe"
-    };
-```
-
-and we wish to do the following:
+Suppose we have JSON object that we get as input. Let's assume that in this input there will always be `first` & `last` attribute. We want to implement a program that does following
+<a id="four-things"> 4 things:</a>
 
 1. Log the input data
 2. Pick first and last attribute
-3. Log the final output
+3. Log the output
+4. Return new value
 
-> To solve this problem, I am going to use Promise API. It can be solved without using promises and synchronous code. However, to build functional solution without promise it warrants the discussion of topic such as pipe or compose which we have not even talked about yet. Using Promise, functionally it behaves (sort of) like a pipe. Therefore, I am choosing Promise API.
+Let's assume in one case we received following JSON data as input:
 
-Let's get started with the non functional version of the code and we will convert it into functional style. Then we will describe what it meant to be functional
+```json
+{
+  "first": "John",
+  "middle": "M",
+  "last": "Doe"
+}
+```
 
 ### Non Functional Code
 
-> Although, this is not a basic of JS book it might be beneficial to talk just a little bit about Promises in JavaScript. For the readers who understand Promise, it is safe to skip this section. In a Promise world, you can start a chain of execution by calling `Promise.resolve` and passing some static set of data. After, that you can use as many `.then` as you want. The `then` method accepts a function and as a input to this function the data from the previous step is passed. Execution starts at the top and makes it way down.
-
-```js  {.line-numbers}
-let input = {
-  first: 'John',
-  middle: 'M',
-  last: 'Doe'
-};
-
-function logAndReturn(data) {
+```js
+function log(data) {
   console.log(data);
-  return data;
 }
 
 function pickAttribute(attributes, data) {
@@ -53,33 +44,41 @@ function pickAttribute(attributes, data) {
   return response;
 }
 
-Promise.resolve(input)
-  .then(data => logAndReturn(data)) // STEP 1
-  .then(data => pickAttribute(['first', 'last'], data)) // STEP 2
-  .then(data => logAndReturn(data)); // STEP 3
+function myAPI(input) {
+  log(input); // STEP 1
+  let newData = pickAttribute(['first', 'last'], input); // STEP 2
+  log(newData); // STEP 3
+  return newData; //STEP 4
+}
+
+myAPI({
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+});
 ```
+
+In the above code the function `myAPI` is how we expose our solution to the user. Eventually this API is invoked with some JSON object and it does the <a href="#four-things"> 4 things </a> we wanted to do
 
 #### Step 1: Log the input data
 
-In the above code, we started promise chain with static input. For the _first then_ method we are passing an arrow function
-
 ```js
-data => logAndReturn(data);
+log(input);
 ```
 
-When the JS engine is ready, it will invoke this arrow function and the input for this function is input that was passed to `Promise.resolve`. In this case it will be the object `{ first: 'John', middle: 'M', last: 'Doe' }` which is referred as `data` in the arrow function. When this arrow function is executed, it simply invokes the function `logAndReturn` by passing the data as a parameter. The function, `logAndReturn`, logs the data and returns the data it received.
+This is pretty trivial step. We simply make use of `console.log` to log the data
 
 #### Step 2: Pick first and last attribute
 
-After the first then block, second then block is executed. For the _second then_ block, we are passing an arrow function
-
 ```js
-data => pickAttribute(['first', 'last'], data);
+let newData = pickAttribute(['first', 'last'], input);
 ```
 
-The result of the first then block was `{ first: 'John', middle: 'M', last: 'Doe' }` which is the input to this second then block. When this arrow function is executed, it invokes the function `pickAttribute` to which we pass array of fields that we want to pluck from the data object. The result of this function is `{ first: 'John', last: 'Doe' }`
+In this step, we make use of the helper function `pickAttribute` to provide with an array of fields we want to pick from the data, second argument. The result of this function is an object with only the fields we provided.
 
-> Some reader more familiar with Array in JavaScript may prefer to rewrite `pickAttribute` function as:
+The result of this step is `{ first: 'John', last: 'Doe' }` which is assigned to the variable `newData`.
+
+> <a id="pickAttribute">Some reader more familiar with Array in JavaScript may prefer to rewrite `pickAttribute` function as: </a>
 >
 > ```js
 > function pickAttribute(attributes, data) {
@@ -90,49 +89,34 @@ The result of the first then block was `{ first: 'John', middle: 'M', last: 'Doe
 > }
 > ```
 >
-> This is much better then using loop because we do not need to dictate how to iterate over array, pick each item in an array and then do our actual work which is reading attribute value. This reduce method makes this code more functional then the for loop approach we used
+> When we used loop, we needed to dictate how to iterate over array - take care of bounds, pick every element form the array. After picking the element, then only we are at the point where we execute the code that we really wanted to write which is reading the attribute value. This approach is referred to as **Imperative Approach**.
+>
+> When we make use of `reduce` method we are getting more declarative. This is because we only need to provide function that describes the things that we wanted to do - pick each attribute and how we collect them. In other words we directly get started with doing our work rather then laying out the ground work needed to get to our point of interest. This approach is referred to as **Declarative Approach** and is also more Functional. Object destructuring, array destructuring, spread operator, rest operator etc. are few examples of the JavaScript API that will help you write declarative code.
 
-#### Step 3: Log the final output
+#### Step 3: Log the output
 
-The return value of second step function was `{ first: 'John', last: 'Doe' }`. Just like in Step 1, this data will be logged
+```js
+log(newData); // STEP 3
+```
+
+This is same as step 1 but here we are logging the object `{ first: 'John', last: 'Doe' }` to console.
+
+#### Step 4: Return new value
+
+```js
+return newData; //STEP 4
+```
+
+Finally, we return `{ first: 'John', last: 'Doe' }` from the function `myAPI`.
 
 ### Functional Code
 
-Let's start by picking the `first then block` from the non functional code which invokes the function `logAndReturn`. Here is the snippet of code we are interested in:
+In order to build functional solution, we need to make use of some of the functional concepts such as pipe or compose. However, we are just getting started and have not covered these concepts. However, using `Promise` API from JavaScript we can build flow of data just like pipe or compose. Therefore, I am going to make use of Promise to build functional solution.
+
+> This book is not about basics of JavaScript. So, we will skip an elaborate discussion of Promise and refer to [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) if you want to read more about Promises.
 
 ```js
-Promise.resolve(input).then(data => logAndReturn(data)); // STEP 1
-```
-
-As mentioned in the beginning, `then` block really needs function as a parameter. It is the responsibility of the `Promise` API to invoke this function with _a parameter_ and therefore the function referenced in then block **must** be unary function.
-
-In our code, we were simply using the arrow function to invoke the function `logAndReturn` with appropriate params. We really do not need the arrow function and can rewrite STEP 1 as:
-
-```js
-Promise.resolve(input).then(logAndReturn); // STEP 1
-```
-
-> Congrats! you just learned **POINT FREE** style in functional programming. The arrow function existed as a glue only to call the function `logAndReturn` by providing the argument it received. Removing such glue code just to pass arguments makes your code point free. This style makes composing all simpler function much more easier as we will see later.
-
-Similarly, we can be point free for STEP 3. Here is new snippet of Promise chain:
-
-```js
-Promise.resolve(input)
-  .then(logAndReturn)
-  .then(data => pickAttribute(['first', 'last'], data)) // STEP 2
-  .then(logAndReturn);
-```
-
-> **Tap**: The function `logAndReturn` has interesting behavior. It takes an input, does something (such as calling other function) and then returns the input unchanged. This kind of behavior is called `tap`. Now knowing what `tap` means, I think a better name for the function `logAndReturn` is `tapLog`. Let's rewrite the promise chain using this new name as:
-
-```js
-let input = {
-  first: 'John',
-  middle: 'M',
-  last: 'Doe'
-};
-
-function tapLog(data) {
+function logAndReturn(data) {
   console.log(data);
   return data;
 }
@@ -144,19 +128,76 @@ function pickAttribute(attributes, data) {
   }, {});
 }
 
-Promise.resolve(input)
-  .then(tapLog)
-  .then(data => pickAttribute(['first', 'last'], data) // STEP 2
-  .then(tapLog);
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(data => logAndReturn(data)) // STEP 1
+    .then(data => pickAttribute(['first', 'last'], data)) // STEP 2
+    .then(data => logAndReturn(data)); // STEP 3 & 4
+}
+
+myAPI({
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+});
 ```
 
-Now lets move to the function `pickAttribute`. For Step 1 & Step 3, we were able to replace the arrow function's with `point free` code by using the function `tapLog` because the airity, number of arguments, of `tapLog` was one. However, for the function `pickAttribute`, airity is two. It _seems_ like we really cannot replace the "glue" arrow function for step 2. 🤔
+In the function `myAPI`, we started `Promise` chain by making use of `Promise.resolve` and provided the params as argument to `resolve` method. Then there are three `then` blocks which does the <a href="#four-things"> 4 things </a> that we want to.
 
-`Closure` to the rescue! Using `Closure` we can reduce the number of arguments for this function. But before I show how, let's analyze arguments for the function `pickAttribute`. It's _first argument_ is an array of attributes that we want to pick (from data - second argument); it's _second argument_ is data we want to operate on.
+#### Step 1: Log the input data
 
-> For this function `pickAttribute` we could have ordered these 2 arguments in reverse order but there is a very good reason why we passed data in second argument, in this case the last argument. After we re-implement the function `pickAttribute` the reason for this particular ordering, where data is passed as last argument, should be clear. As a functional programmer, **memorize the mantra "data last"**
+```js
+return Promise.resolve(params).then(data => logAndReturn(data));
+```
 
-Back to analysis of the arguments, we knew the value for the first argument, properties that we wanted to pick, when we wrote this program. The only unknown part was the data because we did not know what we will get when this program is executed. Now, let's re-write this function `pickAttribute` in a way that we could partially execute this function with the known argument and later be able to specify the unknown argument, which is almost always data, and then execute this function. Using closure we can re-write as:
+In the above code, we started promise chain with static input. Then in the `.then` method we are passing an arrow function
+
+```js
+data => logAndReturn(data);
+```
+
+When JS engine is ready, it will invoke this arrow function and the input for this function is argument that was passed to `Promise.resolve`. In this case it will be the object `{ first: 'John', middle: 'M', last: 'Doe' }` and is referenced by variable `data`. When this arrow function is executed, it simply invokes the function `logAndReturn` by passing data as a parameter. The function `logAndReturn` logs the data and returns the data it received.
+
+The arrow function here is simply a `glue code` and all it did was invoked the function `logAndReturn` by providing the exact argument it received. There really is _no point_ in having this glue code present just to invoke another function by providing the argument. We can remove this glue code and re-write it as
+
+```js
+return Promise.resolve(params).then(logAndReturn);
+```
+
+> Congrats! you just learned **POINT FREE** style. It is a paradigm where we do not mention the argument your code is operating in. You will encounter many more point free style when building pipelines in later chapters. As you will see later, by using point free style composing functions to build pipelines will be much more easier then having to write a glue code.
+
+#### Step 3 & 4: Log the output & Return new value
+
+Step 3 & 4 uses same function `logAndReturn` as in step 2. So, we can re-write it using point free style too.
+
+Here is new implementation for the function `myAPI`
+
+```js
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(logAndReturn) // STEP 1
+    .then(data => pickAttribute(['first', 'last'], data)) // STEP 2
+    .then(logAndReturn); // STEP 3 & 4
+}
+```
+
+#### Step 2: Pick first and last attribute
+
+```js
+then(data => pickAttribute(['first', 'last'], data)); // STEP 2
+```
+
+First thing to notice in this the block is the usage of arrow function - glue code. In Step 1 & 3, the reason we were able to replace glue code with point free version was because the function `logAndReturn` was unary. However, function `pickAttribute` is a binary function. It _seems_ like we really cannot replace the "glue" arrow function for step 2. Or can we? 🤔
+
+`Closure` to the rescue! Using `Closure` we can reduce the number of arguments for this function. But before I show how, let's analyze arguments for the function `pickAttribute`. It's _first argument_ is an array of attributes that we want to pick from it's _second argument_ - the data this function is going to operate on. We could have ordered these 2 arguments in reverse order but there is a very good reason why we passed data in second argument, in this case the last argument, and the reason for passing data last will be clear once we re-implement the function `pickAttribute` using `closure`.
+
+> As a functional programmer, **memorize the mantra "data last"**
+
+Back to analysis of the arguments for `pickAttribute`, even before we started to implement the function `myAPI` we knew that we wanted to pick the attribute first and last from the data that we will eventually receive. The only unknown part is the data & it's up to the caller of the function `myAPI` to specify the data.
+
+Let's try to re-implement this function `pickAttribute`. When trying to reduce the arity - number of arguments passed to the function, the way we want to think is "how do I specify the arguments that I know now and then later provide the unknown argument? When all the arguments are provided, this function needs to execute by making use of the known arguments passed earlier and the data arguments passed later".
+
+Show me the code already:
 
 ```js
 function pickAttribute(attributes) {
@@ -173,7 +214,7 @@ This is suddenly a very interesting function because it is a function that retur
 let bob = pickAttribute(['first', 'last']);
 ```
 
-When we invoke first function `pickAttribute` with known values, it returned the inner function `pickAttributeHelper` which takes only the data argument. When the result of this invocation is assigned to variable `bob`, it references this inner function `pickAttributeHelper` which means bob is a function waiting for the `data` parameter. Now, let's go back to the `then` block in Promise chain. In order to replace the glue arrow function in Step 2 - `data => pickAttribute(['first', 'last'], data`, we wanted a function that takes data argument. The shape of this new function `bob` aka `pickAttributeHelper` matches that. This means we can re-write our promise chain as:
+When we invoke the function `pickAttribute` with known values, it returned the inner function `pickAttributeHelper` which takes only the data argument. When the result of this invocation is assigned to variable `bob` and now it references inner function `pickAttributeHelper` which means bob is a function waiting for the `data` parameter. The signature of `bob` - aka `pickAttributeHelper`, is analogous to the signature of the function `logAndReturn` because they are both waiting for the `data`. Here is new snippet of `myAPI`
 
 ```js
 function pickAttribute(attributes) {
@@ -185,13 +226,15 @@ function pickAttribute(attributes) {
 
 let bob = pickAttribute(['first', 'last']);
 
-Promise.resolve(input)
-  .then(tapLog)
-  .then(bob)
-  .then(tapLog);
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(logAndReturn)
+    .then(bob)
+    .then(logAndReturn);
+}
 ```
 
-In this code snippet, we can certainly remove the line where we declared bob and replace the bob in the promise chain with actual call to the function `pickAttribute` as:
+Now, that we have seen this new snippet we could argue that we really don't need to declare the variable bob just to be referenced in then block. We can re-write `myAPI` as:
 
 ```js
 function pickAttribute(attributes) {
@@ -201,10 +244,12 @@ function pickAttribute(attributes) {
   };
 }
 
-Promise.resolve(input)
-  .then(tapLog)
-  .then(pickAttribute(['first', 'last']))
-  .then(tapLog);
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(logAndReturn)
+    .then(pickAttribute(['first', 'last']))
+    .then(logAndReturn);
+}
 ```
 
 This code certainly reads a lot better then having bob in the middle. Best of all, the name bob was not even very good one and now we don't even have to think about a better name for bob. While we are at it let's finish coding `pickAttribute` by filling the inner function `pickAttributeHelper`
@@ -220,20 +265,18 @@ function pickAttribute(attributes) {
 }
 ```
 
-I literally copy pasted the content from the non functional code that we looked earlier to finish this implementation. Did you notice how `closure` comes into picture in this code?
+I literally copy pasted the content from the <a href="#pickAttribute"> code that we looked earlier </a>. Did you notice how `closure` comes into picture in the new implementation `pickAttribute` of code?
 
-> Closure is observed for the attributes argument because when the inner function executes, it makes the use of the outer function's argument.
+> Closure is observed for the argument attributes because when the inner function executes, it makes the use of the outer function's argument.
 
-Here is the final **functional code**
+> The other important feature of this new version of `pickAttribute` is that it's a _lazy function_. When we initially executed this function as `pickAttribute(['first', 'last'])`, it only executed partially; for it to execute it completely it needs a second invocation with data attribute.
+
+> One last thing to note is that, there are techniques such as _currying_ and _partial application_ - to be discussed in later chapter, that will help us avoid having to write a function that returns function (and so on). By understanding how a function that returns function is a lazy one and how closure comes into play understanding _currying_ and _partial application_ will be much more easier.
+
+Here is the final implementation of **functional code**
 
 ```js
-let input = {
-  first: 'John',
-  middle: 'M',
-  last: 'Doe'
-};
-
-function tapLog(data) {
+function logAndReturn(data) {
   console.log(data);
   return data;
 }
@@ -247,33 +290,34 @@ function pickAttribute(attributes) {
   };
 }
 
-Promise.resolve(input)
-  .then(tapLog)
-  .then(pickAttribute(['first', 'last']))
-  .then(tapLog);
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(logAndReturn)
+    .then(pickAttribute(['first', 'last']))
+    .then(logAndReturn);
+}
+
+myAPI({
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+});
 ```
 
-## Functional Programming
+Now that we have seen the functions style of code, let's talk about what makes this code functional.
+
+## Functional Style Programming
 
 <p align="center">
-    <img src="images/data_viz.png" width="40%">
+    <img src="images/data_viz.png" width="40%"/>
 </p>
 
 This fountain quite elegantly captures the kind of mind set we should have when writing Functional Style of code.
 
-In this water fountain intermediate containers are placed in such a way that when water starts to flow from the top, subsequent container can collect them and pass to the next one until it makes it way to the bottom. As the water flows, each of these intermediate container can totally do something different as the water makes through it. For eg first container can mix red color, second one blue color etc. The only constraint for this fountain is that each intermediate container must eventually pass liquid else it will break down. Also, it is the expectation of each subsequent container that the container before it passes liquid.
+In this fountain flow of liquid starts at the top, 1<sup>st</sup> container. Then it makes it's way through the 2<sup>nd</sup>, 3<sup>rd</sup> and 4<sup>th</sup> container and finally to bottom where it's getting collected. There is an implicit requirement for this fountain to work properly. Can you guess what it is?
 
-Now let's revisit the functional `Promise.chain` one more time.
+Only liquid should flow from this container! Each subsequent containers are built with the idea that they will collect the liquid coming from previous container, do something (such as add color to it) and then pass it to the next container. As long as it honors the contract that it passes liquid, the fountain will container to operate without any issues.
 
-```js
-Promise.resolve(input)
-  .then(tapLog)
-  .then(pickAttribute(['first', 'last']))
-  .then(tapLog);
-```
+If you think from programming side, we could say that each container represents a function. By combining few of these functions we were able to build this new system. Further we can even say that each function takes the output of previous function as input, operates on it and returns some value which then becomes input to the next function.
 
-This Promise chain is analogous to the water fountain image shown above. `Promise.resolve` is equivalent to the top of the fountain from which water starts to flow. Each `then` block is equivalent to the intermediate container of the fountain. The only constraint on subsequent then block is that they must be able to operate on the data returned by previous step.
-
-> With Functional Programming, our goal is to build an abstract flow of control that eventually operates on data. Our mindset should be set on building a fountain with right containers that is eventually just waiting for data to operate on.
-
-[WORK IN PROGRESS]
+If `myAPI` function is the fountain, each of the then blocks are equivalent to individual container. Each of the function takes the return value of previous then block as input, operates on them and finally returns something for next then block.

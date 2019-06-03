@@ -1,16 +1,7 @@
 'use strict';
 
-let data = [1, 2, 3, 4, 5];
-
-let input = {
-  first: 'John',
-  middle: 'M',
-  last: 'Doe'
-};
-
-function logAndReturn(data) {
+function log(data) {
   console.log(data);
-  return data;
 }
 
 function pickAttribute(attributes, data) {
@@ -22,7 +13,15 @@ function pickAttribute(attributes, data) {
   return response;
 }
 
-Promise.resolve(input)
-  .then(data => logAndReturn(data)) // STEP 1
-  .then(data => pickAttribute(['first', 'last'], data)) // STEP 2
-  .then(data => logAndReturn(data)); // STEP 3
+function myAPI(input) {
+  log(input); // STEP 1
+  let newData = pickAttribute(['first', 'last'], input); // STEP 2
+  log(newData); // STEP 3
+  return newData;
+}
+
+myAPI({
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+});

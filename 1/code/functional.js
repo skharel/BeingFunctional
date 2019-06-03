@@ -1,12 +1,6 @@
 'use strict';
 
-let input = {
-  first: 'John',
-  middle: 'M',
-  last: 'Doe'
-};
-
-function tapLog(data) {
+function logAndReturn(data) {
   console.log(data);
   return data;
 }
@@ -20,7 +14,15 @@ function pickAttribute(attributes) {
   };
 }
 
-Promise.resolve(input)
-  .then(tapLog)
-  .then(pickAttribute(['first', 'last']))
-  .then(tapLog);
+function myAPI(params) {
+  return Promise.resolve(params)
+    .then(logAndReturn)
+    .then(pickAttribute(['first', 'last']))
+    .then(logAndReturn);
+}
+
+myAPI({
+  first: 'John',
+  middle: 'M',
+  last: 'Doe'
+});
