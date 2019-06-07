@@ -1,4 +1,4 @@
-# Being functional - what does it mean?
+# Getting functional
 
 We recently had new team member joining our team. As part of onboarding I was giving him an overview of coding practice we follow and quickly mentioned that we do "Functional Style Programming" using JavaScript. I pulled some code from our repository and tried to explain what was going on; but I was quite unsatisfied with my own explanation.
 
