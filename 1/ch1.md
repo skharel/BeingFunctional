@@ -318,10 +318,10 @@ In this fountain flow of liquid starts at the top, 1<sup>st</sup> container. The
 
 This system works only with liquid! When liquid starts to flow from the top, 1<sup>st</sup> container will start to collect it and eventually it overflows; then same cycle happens with the next one and so on. As long as it honors the contract that liquid flows through, this fountain will operate without any issues. The other thing to observe is that as the liquid makes it's way through these containers, they are free to operate on it. For example some container might add red color while some might add green; some may even choose to do nothing and just pass the liquid as it received.
 
-If you think from programming side, we could say that each container represents a function. By combining few of these functions we were able to build this new system which is the fountain. Further, we can even say that output from each function is input to next function. Each function takes the input, operates on it and returns some value which then becomes input to the next function.
-
 If you think from programming side, we could say that the whole fountain is analogous to our function `myAPI`. Each container in this fountain is analogous to the function in `then` block of the `Promise` chain. We can see that just as liquid flows from upper container to lower one, data flows from upper then block to the lower then block. Finally, just as theses containers are waiting only for liquid to flow through, our functions in then block are waiting only for data. This behavior of function being ready and waiting only for data is more profound in case of lazily executed function `pickAttribute(['first', 'last'])`, which is now simply waiting for data.
 
 This is exactly our goal when we write functional style of code. We need to build a pipeline of code - aka a system, by making use of simpler functions which are either lazily executed or not executed at all and waiting for the "data". As soon as the data flows through this pipeline, the system will fully execute.
 
-[WORK IN PROGRESS]
+## Summary
+
+At the end of this chapter, the one take way we want to have is an understanding of what makes a code functional. We want to build pipeline by composing simpler functions that are waiting for data. When data flows through this pipeline, it goes through each of these functions; each functions operates on them and returns value for next function and finally some value is returned by this pipeline.
