@@ -252,7 +252,7 @@ function myAPI(params) {
 }
 ```
 
-This code certainly reads a lot better then having bob in the middle. Best of all, the name bob was not even very good one and now we don't even have to think about a better name for bob. While we are at it let's finish coding `pickAttribute` by filling the inner function <a id="fppickattr"> `pickAttributeHelper` </a>
+This code certainly reads a lot better then having bob in the middle. Best of all, the name bob was not even very good one and now we don't even have to think about a better name for bob. While we are at it let's finish coding `pickAttribute` by filling <a id="fppickattr"> the inner function </a> `pickAttributeHelper`
 
 ```js
 function pickAttribute(attributes) {
